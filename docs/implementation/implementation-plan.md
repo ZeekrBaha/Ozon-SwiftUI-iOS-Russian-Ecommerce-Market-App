@@ -108,6 +108,45 @@
   Dynamic Type one step and confirm no clipped layouts / 2-line truncation holds
   (N2); write `validation-report.md`.
 
+## Phase 7 — Post-review revisions (after first build + screenshot compare)
+
+Changes made iterating against the reference screenshots and user feedback.
+All built clean and re-verified on the iPhone 15 Pro Max simulator.
+
+**T17. Real imagery (replaces placeholder fallback for shipped assets).**
+- Product/quick-action images: keyword-matched photos, downscaled (max 200px,
+  low JPEG) — bundle imagery ~150 KB.
+- Category images: **transparent product cutouts** — source photos run through
+  `rembg` (background removal, Wikimedia Commons source, auto-picked by subject
+  coverage), trimmed + resized to 300px PNG.
+- Acceptance: every category tile shows a clean isolated product (no busy
+  backgrounds); `ProductImage` placeholder still fires for any missing asset.
+
+**T18. CategoryCard reframe (Screen 2 fidelity).**
+- Card height 132 → **188**; product image enlarged, bottom-right, `.fit` over
+  the light card (label stays top-left).
+- Acceptance: matches the reference catalog layout (tall card, large cutout).
+
+**T19. Home carousel — auto-advancing image banners (Screen 1).**
+- 4 banners in `SampleData.banners` (full-bleed promo images, `Banner` model).
+- Paged `TabView(selection:)` + `Timer` (3s): slides left, loops; 4 page dots.
+- Acceptance: dots = 4; banner auto-advances and wraps; verified via two
+  screenshots 4s apart showing different slides.
+
+**T20. Home header pull-up.**
+- Reduced gradient-header top padding (8 → 2) and row spacing (14 → 10) so the
+  search bar sits high near the top, matching the reference.
+- Note: the brand pill stays just below the Dynamic Island (cannot draw the
+  wordmark into the island row) — overrides the original red-line #1 wording per
+  user request, while keeping the logo off the status-bar text.
+
+**T21. Ship polish.**
+- Stripped the screenshot-only `START_TAB` env hook from `RootTabView`.
+- Real `AppIcon` (blue gradient + white "O!" wordmark, 1024px).
+
+> New files added after T0 require `xcodegen generate` before building
+> (`Banner.swift` triggered this).
+
 ## Requirements → tasks → validation traceability
 
 | Req | Task(s)      | Validated by |
