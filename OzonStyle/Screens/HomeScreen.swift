@@ -38,7 +38,7 @@ struct HomeScreen: View {
     // MARK: Gradient header (logo + city/login + search + hero, all inside gradient)
 
     private var gradientHeader: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             AppLogoHeader()
 
             // City + login row
@@ -67,8 +67,8 @@ struct HomeScreen: View {
                 .padding(.horizontal, Layout.gutter)
                 .padding(.top, 4)
         }
-        .padding(.top, 8)
-        .padding(.bottom, 22)
+        .padding(.top, 2)
+        .padding(.bottom, 20)
         .background(
             UnevenRoundedRectangle(
                 bottomLeadingRadius: Layout.cornerSheet,
@@ -132,31 +132,9 @@ struct HomeScreen: View {
     }
 
     private func bannerSlide(_ banner: Banner) -> some View {
-        let (colors, darkText) = bannerStyle(banner.style)
-        return ZStack(alignment: .leading) {
-            LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(banner.title)
-                    .font(.system(size: 18, weight: .semibold))
-                Text(banner.subtitle)
-                    .font(.system(size: 24, weight: .heavy))
-            }
-            .foregroundStyle(darkText ? Color.textPrimary : .white)
-            .padding(.horizontal, 20)
-        }
-    }
-
-    private func bannerStyle(_ style: Int) -> ([Color], Bool) {
-        switch style {
-        case 1: return ([Color(red: 0.91, green: 0.93, blue: 0.96),
-                         Color(red: 0.82, green: 0.85, blue: 0.90)], true)
-        case 2: return ([Color(red: 0.04, green: 0.10, blue: 0.23),
-                         Color(red: 0.07, green: 0.16, blue: 0.29)], false)
-        case 3: return ([Color(red: 1.00, green: 0.18, blue: 0.49),
-                         Color(red: 0.94, green: 0.07, blue: 0.49)], false)
-        default: return ([Color(red: 0.00, green: 0.42, blue: 1.0),
-                          Color(red: 0.00, green: 0.30, blue: 0.92)], false)
-        }
+        ProductImage(name: banner.imageName, contentMode: .fill)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
     }
 
     // MARK: Quick actions rail

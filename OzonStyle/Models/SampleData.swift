@@ -140,10 +140,10 @@ enum SampleData {
     // MARK: Carousel banners (Home, 4 slides — auto-advancing)
 
     static let banners: [Banner] = [
-        Banner(title: "Ещё больше товаров", subtitle: "с постоплатой",      style: 0),
-        Banner(title: "КОМПЬЮТЕРЫ",         subtitle: "под любые задачи",   style: 1),
-        Banner(title: "Защита от солнца",   subtitle: "выбери свой крем",   style: 2),
-        Banner(title: "Рассрочка 0-0-6",    subtitle: "без переплат",       style: 3)
+        Banner(imageName: "banner_computers"),
+        Banner(imageName: "banner_cosmetics"),
+        Banner(imageName: "banner_gadgets"),
+        Banner(imageName: "banner_home")
     ]
 
     // MARK: Quick actions (6, exact order — design.md Screen 1)
