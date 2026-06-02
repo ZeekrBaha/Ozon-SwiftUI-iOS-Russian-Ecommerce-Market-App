@@ -27,6 +27,7 @@ A Russian-language e-commerce storefront built in SwiftUI for iOS 17+, recreatin
 | Data | `ProductRepository` protocol → `SampleDataRepository` (DI seam) |
 | Images | Asset-catalog imagesets + `ProductImage` placeholder fallback |
 | Project | XcodeGen (`project.yml`) |
+| Tests | XCUITest — full screen + navigation coverage (8 tests) |
 | Dependencies | None |
 
 ---
@@ -157,6 +158,9 @@ OzonStyle/
 │   └── ProductDetailScreen.swift  pushed destination (reuses product components)
 └── Resources/
     └── Assets.xcassets            12 color sets · AppIcon · 30 imagesets
+
+OzonStyleUITests/
+└── OzonStyleUITests.swift         8 XCUITests — every screen + nav flow
 ```
 
 ---
@@ -198,6 +202,33 @@ The gate is visual fidelity + **8 binary red-lines** (full report in
 | 6 | Home hero lives inside the gradient header | ✅ |
 | 7 | One shared `Product` model + single `ProductCard` (no inline tiles) | ✅ |
 | 8 | Brand wordmark/colors never hardcoded in screen views | ✅ |
+
+---
+
+## Tests
+
+UI tests (`XCUITest`) cover the full app surface — every screen and the
+coordinator navigation flow. **8/8 green** on the iPhone 15 Pro Max simulator.
+
+| Test | Covers |
+|------|--------|
+| `testTabBarHasFiveTabs` | 5-tab structure + labels |
+| `testHomeScreen` | Home renders ("Рекомендуем") |
+| `testCatalogScreen` | Catalog category grid |
+| `testFavoritesScreen` | Favorites section |
+| `testCartScreen` | Cart empty-state band |
+| `testProfileScreen` | Profile login CTA |
+| `testProductDetailNavigationFromHome` | tap product → `ProductDetailScreen` → back |
+| `testProductDetailNavigationFromCart` | detail reachable from a second tab's coordinator |
+
+```bash
+xcodegen generate
+xcodebuild test -scheme OzonStyle \
+  -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max'
+```
+
+Product cards expose a single `productCard` accessibility element (also improves
+VoiceOver), which the navigation tests tap.
 
 ---
 

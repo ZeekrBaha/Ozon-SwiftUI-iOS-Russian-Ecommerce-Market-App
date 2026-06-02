@@ -25,6 +25,10 @@ struct ProductCard: View {
         }
         .padding(10)
         .background(.surfaceCard, in: RoundedRectangle(cornerRadius: Layout.cornerCard))
+        // Expose the whole card as one tappable element for UI tests / VoiceOver.
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier("productCard")
     }
 
     private var imageBlock: some View {
