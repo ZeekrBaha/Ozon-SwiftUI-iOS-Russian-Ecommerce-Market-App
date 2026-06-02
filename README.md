@@ -27,7 +27,7 @@ A Russian-language e-commerce storefront built in SwiftUI for iOS 17+, recreatin
 | Data | `ProductRepository` protocol → `SampleDataRepository` (DI seam) |
 | Images | Asset-catalog imagesets + `ProductImage` placeholder fallback |
 | Project | XcodeGen (`project.yml`) |
-| Tests | XCUITest — full screen + navigation coverage (8 tests) |
+| Tests | XCUITest — screen, navigation + layout coverage (14 tests) |
 | Dependencies | None |
 
 ---
@@ -160,7 +160,8 @@ OzonStyle/
     └── Assets.xcassets            12 color sets · AppIcon · 30 imagesets
 
 OzonStyleUITests/
-└── OzonStyleUITests.swift         8 XCUITests — every screen + nav flow
+├── OzonStyleUITests.swift         8 tests — every screen + product→detail nav
+└── LayoutUITests.swift            6 tests — red-line geometry (frames, grids)
 ```
 
 ---
@@ -207,8 +208,10 @@ The gate is visual fidelity + **8 binary red-lines** (full report in
 
 ## Tests
 
-UI tests (`XCUITest`) cover the full app surface — every screen and the
-coordinator navigation flow. **8/8 green** on the iPhone 15 Pro Max simulator.
+UI tests (`XCUITest`) cover the full app surface. **14/14 green** on the
+iPhone 15 Pro Max simulator — 8 functional + 6 layout.
+
+**Functional** (`OzonStyleUITests.swift`) — structure, content, navigation:
 
 | Test | Covers |
 |------|--------|
@@ -221,14 +224,26 @@ coordinator navigation flow. **8/8 green** on the iPhone 15 Pro Max simulator.
 | `testProductDetailNavigationFromHome` | tap product → `ProductDetailScreen` → back |
 | `testProductDetailNavigationFromCart` | detail reachable from a second tab's coordinator |
 
+**Layout** (`LayoutUITests.swift`) — the visual red-lines, automated as
+`XCUIElement.frame` assertions (no pixel-snapshot library → still zero-dependency):
+
+| Test | Red-line |
+|------|----------|
+| `testTabBarPinnedToBottom` | tab bar flush to the bottom edge |
+| `testLogoPillBelowSafeAreaAndCentered` | #1 — pill below the status bar, centered |
+| `testFavoritesFeaturedIsCompactLeftAligned` | #2 — featured card compact + left-aligned |
+| `testCartEmptyBandFullWidth` | #3 — empty state is a full-width band |
+| `testHomeGridIsTwoColumn` | Home grid geometry (2 columns) |
+| `testCatalogGridIsThreeColumn` | #5 — Catalog grid geometry (3 columns) |
+
 ```bash
 xcodegen generate
 xcodebuild test -scheme OzonStyle \
   -destination 'platform=iOS Simulator,name=iPhone 15 Pro Max'
 ```
 
-Product cards expose a single `productCard` accessibility element (also improves
-VoiceOver), which the navigation tests tap.
+Product and category cards expose single `productCard` / `categoryCard`
+accessibility elements (also improves VoiceOver) that the tests query and tap.
 
 ---
 

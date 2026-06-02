@@ -47,6 +47,8 @@ struct CartScreen: View {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 32)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityIdentifier("cartEmptyBand")
                 }
 
                 SectionHeader("Вы смотрели")

@@ -25,5 +25,7 @@ struct CategoryCard: View {
         }
         .frame(height: 188)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("categoryCard")
     }
 }
