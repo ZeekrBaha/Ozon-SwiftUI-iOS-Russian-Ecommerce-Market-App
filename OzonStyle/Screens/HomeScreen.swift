@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 // Screen 1 — Главная (design.md §4). Hero lives INSIDE the gradient (red-line #6).
 struct HomeScreen: View {
@@ -6,6 +7,10 @@ struct HomeScreen: View {
         repeating: GridItem(.flexible(), spacing: Layout.cardSpacing),
         count: 2
     )
+
+    // Carousel auto-advance. Slides left every 3s, loops.
+    @State private var bannerIndex = 0
+    private let bannerTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ScrollView {
@@ -108,28 +113,50 @@ struct HomeScreen: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: Carousel banner (single static slide + dots)
+    // MARK: Carousel banner (4 slides, auto-advancing, dots)
 
     private var carouselBanner: some View {
-        TabView {
-            ZStack(alignment: .leading) {
-                LinearGradient(
-                    colors: [Color(red: 0.0, green: 0.42, blue: 1.0),
-                             Color(red: 0.0, green: 0.30, blue: 0.92)],
-                    startPoint: .leading, endPoint: .trailing)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Ещё больше товаров")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("с постоплатой")
-                        .font(.system(size: 24, weight: .heavy))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 20)
+        TabView(selection: $bannerIndex) {
+            ForEach(Array(SampleData.banners.enumerated()), id: \.element.id) { i, banner in
+                bannerSlide(banner).tag(i)
             }
         }
         .frame(height: 150)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .tabViewStyle(.page(indexDisplayMode: .always))
+        .onReceive(bannerTimer) { _ in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                bannerIndex = (bannerIndex + 1) % SampleData.banners.count
+            }
+        }
+    }
+
+    private func bannerSlide(_ banner: Banner) -> some View {
+        let (colors, darkText) = bannerStyle(banner.style)
+        return ZStack(alignment: .leading) {
+            LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(banner.title)
+                    .font(.system(size: 18, weight: .semibold))
+                Text(banner.subtitle)
+                    .font(.system(size: 24, weight: .heavy))
+            }
+            .foregroundStyle(darkText ? Color.textPrimary : .white)
+            .padding(.horizontal, 20)
+        }
+    }
+
+    private func bannerStyle(_ style: Int) -> ([Color], Bool) {
+        switch style {
+        case 1: return ([Color(red: 0.91, green: 0.93, blue: 0.96),
+                         Color(red: 0.82, green: 0.85, blue: 0.90)], true)
+        case 2: return ([Color(red: 0.04, green: 0.10, blue: 0.23),
+                         Color(red: 0.07, green: 0.16, blue: 0.29)], false)
+        case 3: return ([Color(red: 1.00, green: 0.18, blue: 0.49),
+                         Color(red: 0.94, green: 0.07, blue: 0.49)], false)
+        default: return ([Color(red: 0.00, green: 0.42, blue: 1.0),
+                          Color(red: 0.00, green: 0.30, blue: 0.92)], false)
+        }
     }
 
     // MARK: Quick actions rail
