@@ -12,6 +12,7 @@ struct AppLogoHeader: View {
             .padding(.horizontal, 14)
             .frame(height: 30)
             .background(Brand.pillColor, in: Capsule())
+            .accessibilityIdentifier("brandPill")
             .frame(maxWidth: .infinity, alignment: .center)
     }
 }

@@ -108,6 +108,80 @@
   Dynamic Type one step and confirm no clipped layouts / 2-line truncation holds
   (N2); write `validation-report.md`.
 
+## Phase 7 — Post-review revisions (after first build + screenshot compare)
+
+Changes made iterating against the reference screenshots and user feedback.
+All built clean and re-verified on the iPhone 15 Pro Max simulator.
+
+**T17. Real imagery (replaces placeholder fallback for shipped assets).**
+- Product/quick-action images: keyword-matched photos, downscaled (max 200px,
+  low JPEG) — bundle imagery ~150 KB.
+- Category images: **transparent product cutouts** — source photos run through
+  `rembg` (background removal, Wikimedia Commons source, auto-picked by subject
+  coverage), trimmed + resized to 300px PNG.
+- Acceptance: every category tile shows a clean isolated product (no busy
+  backgrounds); `ProductImage` placeholder still fires for any missing asset.
+
+**T18. CategoryCard reframe (Screen 2 fidelity).**
+- Card height 132 → **188**; product image enlarged, bottom-right, `.fit` over
+  the light card (label stays top-left).
+- Acceptance: matches the reference catalog layout (tall card, large cutout).
+
+**T19. Home carousel — auto-advancing image banners (Screen 1).**
+- 4 banners in `SampleData.banners` (full-bleed promo images, `Banner` model).
+- Paged `TabView(selection:)` + `Timer` (3s): slides left, loops; 4 page dots.
+- Acceptance: dots = 4; banner auto-advances and wraps; verified via two
+  screenshots 4s apart showing different slides.
+
+**T20. Home header pull-up.**
+- Reduced gradient-header top padding (8 → 2) and row spacing (14 → 10) so the
+  search bar sits high near the top, matching the reference.
+- Note: the brand pill stays just below the Dynamic Island (cannot draw the
+  wordmark into the island row) — overrides the original red-line #1 wording per
+  user request, while keeping the logo off the status-bar text.
+
+**T21. Ship polish.**
+- Stripped the screenshot-only `START_TAB` env hook from `RootTabView`.
+- Real `AppIcon` (blue gradient + white "O!" wordmark, 1024px).
+
+> New files added after T0 require `xcodegen generate` before building
+> (`Banner.swift` triggered this).
+
+## Phase 8 — MVVM-C architecture refactor
+
+Re-architected the flat presentational app into **MVVM-C** (Model · View ·
+ViewModel · Coordinator) on user request. UI output is byte-identical to Phase 7
+(verified by screenshot) — this is a structural change only.
+
+**T22. Service layer.** `ProductRepository` protocol + `SampleDataRepository`.
+- ViewModels depend on the protocol, never on `SampleData` directly. `SampleData`
+  stays the single source of truth (red-line #7), now reachable only through the
+  repository — a clean DI seam for a future network/DB source.
+
+**T23. ViewModels (one per screen).** `@MainActor ObservableObject`, `@Published`
+state, repository-injected: `HomeViewModel` (owns carousel index + `advanceBanner()`),
+`CatalogViewModel`, `FavoritesViewModel`, `CartViewModel` (`isEmpty` flag),
+`ProfileViewModel`.
+
+**T24. Coordinators.** `AppCoordinator` = composition root (builds the repository,
+all 5 VMs, 5 `TabCoordinator`s, holds `selectedTab`). `TabCoordinator` owns a
+per-tab `NavigationPath` + `show(_ product:)`. `AppRoute` enum maps routes →
+destinations; `CoordinatedStack<Root>` wraps each tab's root in a
+`NavigationStack(path:)` and registers `navigationDestination(for: AppRoute.self)`.
+
+**T25. Views consume VMs + forward intent.** Screens take `@ObservedObject` VMs and
+an `onSelectProduct` closure; tapping any `ProductCard` calls
+`coordinator.show(product)`. Root screens hide their nav bar (headers self-manage
+the top area); the pushed detail screen shows the bar + back button.
+
+**T26. ProductDetailScreen (new).** Pushed destination for `AppRoute.productDetail`
+— reuses `ProductImage`/`PriceBlock`/`RatingRow`/`CTAButton` so the coordinator has
+a real navigation target. No reference screenshot exists for it (outside the 5
+mocked surfaces).
+
+> Red-lines #1–#8 all still hold. New layers (`Coordinators/`, `ViewModels/`,
+> `Services/`) require `xcodegen generate` before building.
+
 ## Requirements → tasks → validation traceability
 
 | Req | Task(s)      | Validated by |

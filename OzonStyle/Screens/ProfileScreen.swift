@@ -3,6 +3,9 @@ import SwiftUI
 // Screen 5 — Мой Ozon, logged out (design.md §4). Two separate grouped
 // sections on backgroundApp (red-line #4).
 struct ProfileScreen: View {
+    @ObservedObject var viewModel: ProfileViewModel
+    let onSelectProduct: (Product) -> Void
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: Layout.cardSpacing),
         count: 2
@@ -18,8 +21,9 @@ struct ProfileScreen: View {
                 SectionHeader("Подобрали по вашим интересам")
 
                 LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
-                    ForEach(SampleData.recommended) { product in
+                    ForEach(viewModel.recommended) { product in
                         ProductCard(product: product, variant: .grid)
+                            .onTapGesture { onSelectProduct(product) }
                     }
                 }
                 .padding(.horizontal, Layout.gutter)
@@ -27,6 +31,7 @@ struct ProfileScreen: View {
             .padding(.bottom, 16)
         }
         .background(Color.backgroundApp)
+        .navigationBarHidden(true)
     }
 
     // A. CTA section — full-width white surface, rounded bottom corners 24
@@ -83,12 +88,15 @@ struct ProfileScreen: View {
     // B. Settings group — white surface, rounded 20, hairline separators
     private var settingsSection: some View {
         VStack(spacing: 0) {
-            ForEach(Array(SampleData.settings.enumerated()), id: \.element.id) { index, item in
-                SettingsRow(item: item, showDivider: index < SampleData.settings.count - 1)
+            ForEach(Array(viewModel.settings.enumerated()), id: \.element.id) { index, item in
+                SettingsRow(item: item, showDivider: index < viewModel.settings.count - 1)
             }
         }
         .background(Color.surfaceCard, in: RoundedRectangle(cornerRadius: 20))
     }
 }
 
-#Preview { ProfileScreen() }
+#Preview {
+    ProfileScreen(viewModel: ProfileViewModel(repository: SampleDataRepository()),
+                  onSelectProduct: { _ in })
+}

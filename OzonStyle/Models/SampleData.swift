@@ -137,6 +137,15 @@ enum SampleData {
         Category(title: "Книги",                 imageName: "cat_books")
     ]
 
+    // MARK: Carousel banners (Home, 4 slides — auto-advancing)
+
+    static let banners: [Banner] = [
+        Banner(imageName: "banner_computers"),
+        Banner(imageName: "banner_cosmetics"),
+        Banner(imageName: "banner_gadgets"),
+        Banner(imageName: "banner_home")
+    ]
+
     // MARK: Quick actions (6, exact order — design.md Screen 1)
 
     static let quickActions: [QuickAction] = [

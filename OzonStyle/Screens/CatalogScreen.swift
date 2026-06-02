@@ -2,6 +2,8 @@ import SwiftUI
 
 // Screen 2 — Каталог (design.md §4). Logo + search + 3-col category grid.
 struct CatalogScreen: View {
+    @ObservedObject var viewModel: CatalogViewModel
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: Layout.gridSpacing),
         count: 3
@@ -16,7 +18,7 @@ struct CatalogScreen: View {
                     .padding(.horizontal, Layout.gutter)
 
                 LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
-                    ForEach(SampleData.categories) { category in
+                    ForEach(viewModel.categories) { category in
                         CategoryCard(category: category)
                     }
                 }
@@ -26,7 +28,10 @@ struct CatalogScreen: View {
             .padding(.bottom, 16)
         }
         .background(Color.backgroundApp)
+        .navigationBarHidden(true)
     }
 }
 
-#Preview { CatalogScreen() }
+#Preview {
+    CatalogScreen(viewModel: CatalogViewModel(repository: SampleDataRepository()))
+}

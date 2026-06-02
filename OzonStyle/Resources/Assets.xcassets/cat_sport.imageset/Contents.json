@@ -1,4 +1,4 @@
 {
-  "images" : [ { "filename" : "cat_sport.jpg", "idiom" : "universal" } ],
+  "images" : [ { "filename" : "cat_sport.png", "idiom" : "universal" } ],
   "info" : { "author" : "xcode", "version" : 1 }
 }

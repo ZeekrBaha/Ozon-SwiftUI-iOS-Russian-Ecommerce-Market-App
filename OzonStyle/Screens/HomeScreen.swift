@@ -1,11 +1,20 @@
 import SwiftUI
+import Combine
 
 // Screen 1 — Главная (design.md §4). Hero lives INSIDE the gradient (red-line #6).
+// State comes from HomeViewModel; product taps are forwarded to the coordinator
+// via `onSelectProduct`.
 struct HomeScreen: View {
+    @ObservedObject var viewModel: HomeViewModel
+    let onSelectProduct: (Product) -> Void
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: Layout.cardSpacing),
         count: 2
     )
+
+    // Carousel auto-advance. Slides left every 3s, loops (logic in the VM).
+    private let bannerTimer = Timer.publish(every: 3, on: .main, in: .common).autoconnect()
 
     var body: some View {
         ScrollView {
@@ -18,8 +27,9 @@ struct HomeScreen: View {
                 VStack(spacing: 12) {
                     SectionHeader("Рекомендуем")
                     LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
-                        ForEach(SampleData.recommended) { product in
+                        ForEach(viewModel.recommended) { product in
                             ProductCard(product: product, variant: .grid)
+                                .onTapGesture { onSelectProduct(product) }
                         }
                     }
                     .padding(.horizontal, Layout.gutter)
@@ -28,12 +38,13 @@ struct HomeScreen: View {
             .padding(.bottom, 16)
         }
         .background(Color.backgroundApp)
+        .navigationBarHidden(true)
     }
 
     // MARK: Gradient header (logo + city/login + search + hero, all inside gradient)
 
     private var gradientHeader: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             AppLogoHeader()
 
             // City + login row
@@ -62,8 +73,8 @@ struct HomeScreen: View {
                 .padding(.horizontal, Layout.gutter)
                 .padding(.top, 4)
         }
-        .padding(.top, 8)
-        .padding(.bottom, 22)
+        .padding(.top, 2)
+        .padding(.bottom, 20)
         .background(
             UnevenRoundedRectangle(
                 bottomLeadingRadius: Layout.cornerSheet,
@@ -108,28 +119,28 @@ struct HomeScreen: View {
         .frame(maxWidth: .infinity)
     }
 
-    // MARK: Carousel banner (single static slide + dots)
+    // MARK: Carousel banner (4 slides, auto-advancing, dots)
 
     private var carouselBanner: some View {
-        TabView {
-            ZStack(alignment: .leading) {
-                LinearGradient(
-                    colors: [Color(red: 0.0, green: 0.42, blue: 1.0),
-                             Color(red: 0.0, green: 0.30, blue: 0.92)],
-                    startPoint: .leading, endPoint: .trailing)
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Ещё больше товаров")
-                        .font(.system(size: 18, weight: .semibold))
-                    Text("с постоплатой")
-                        .font(.system(size: 24, weight: .heavy))
-                }
-                .foregroundStyle(.white)
-                .padding(.horizontal, 20)
+        TabView(selection: $viewModel.bannerIndex) {
+            ForEach(Array(viewModel.banners.enumerated()), id: \.element.id) { i, banner in
+                bannerSlide(banner).tag(i)
             }
         }
         .frame(height: 150)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .tabViewStyle(.page(indexDisplayMode: .always))
+        .onReceive(bannerTimer) { _ in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                viewModel.advanceBanner()
+            }
+        }
+    }
+
+    private func bannerSlide(_ banner: Banner) -> some View {
+        ProductImage(name: banner.imageName, contentMode: .fill)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
     }
 
     // MARK: Quick actions rail
@@ -137,7 +148,7 @@ struct HomeScreen: View {
     private var quickActionsRail: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .top, spacing: 14) {
-                ForEach(SampleData.quickActions) { action in
+                ForEach(viewModel.quickActions) { action in
                     QuickActionTile(action: action)
                 }
             }
@@ -146,4 +157,7 @@ struct HomeScreen: View {
     }
 }
 
-#Preview { HomeScreen() }
+#Preview {
+    HomeScreen(viewModel: HomeViewModel(repository: SampleDataRepository()),
+               onSelectProduct: { _ in })
+}

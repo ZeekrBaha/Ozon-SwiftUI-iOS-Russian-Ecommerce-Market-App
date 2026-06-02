@@ -2,6 +2,9 @@ import SwiftUI
 
 @main
 struct OzonStyleApp: App {
+    // Composition root for the whole app — owns the coordinator graph + VMs.
+    @StateObject private var coordinator = AppCoordinator()
+
     init() {
         // Inactive tab item color = textSecondary (design.md §2).
         let inactive = UIColor(Color.textSecondary)
@@ -20,7 +23,7 @@ struct OzonStyleApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
+            RootTabView(coordinator: coordinator)
                 .tint(.brandPrimary)
         }
     }

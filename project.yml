@@ -24,3 +24,24 @@ targets:
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
         INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: brandPrimary
+  OzonStyleUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - OzonStyleUITests
+    dependencies:
+      - target: OzonStyle
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.baha.OzonStyleUITests
+        TEST_TARGET_NAME: OzonStyle
+schemes:
+  OzonStyle:
+    build:
+      targets:
+        OzonStyle: all
+    test:
+      targets:
+        - OzonStyleUITests
+    run:
+      config: Debug
