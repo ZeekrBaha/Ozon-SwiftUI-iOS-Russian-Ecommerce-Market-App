@@ -2,6 +2,9 @@ import SwiftUI
 
 // Screen 3 — Избранное (design.md §4). Filter row + compact featured + 2-col grid.
 struct FavoritesScreen: View {
+    @ObservedObject var viewModel: FavoritesViewModel
+    let onSelectProduct: (Product) -> Void
+
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: Layout.cardSpacing),
         count: 2
@@ -30,8 +33,9 @@ struct FavoritesScreen: View {
 
                 // Featured: compact, left-aligned (red-line #2)
                 HStack {
-                    ProductCard(product: SampleData.watch, variant: .featuredCompact)
+                    ProductCard(product: viewModel.featured, variant: .featuredCompact)
                         .frame(width: featuredWidth)
+                        .onTapGesture { onSelectProduct(viewModel.featured) }
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, Layout.gutter)
@@ -39,8 +43,9 @@ struct FavoritesScreen: View {
                 SectionHeader("Подобрали для вас")
 
                 LazyVGrid(columns: columns, spacing: Layout.gridSpacing) {
-                    ForEach(SampleData.recommended) { product in
+                    ForEach(viewModel.recommended) { product in
                         ProductCard(product: product, variant: .grid)
+                            .onTapGesture { onSelectProduct(product) }
                     }
                 }
                 .padding(.horizontal, Layout.gutter)
@@ -49,7 +54,11 @@ struct FavoritesScreen: View {
             .padding(.bottom, 16)
         }
         .background(Color.backgroundApp)
+        .navigationBarHidden(true)
     }
 }
 
-#Preview { FavoritesScreen() }
+#Preview {
+    FavoritesScreen(viewModel: FavoritesViewModel(repository: SampleDataRepository()),
+                    onSelectProduct: { _ in })
+}

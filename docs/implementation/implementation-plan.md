@@ -147,6 +147,41 @@ All built clean and re-verified on the iPhone 15 Pro Max simulator.
 > New files added after T0 require `xcodegen generate` before building
 > (`Banner.swift` triggered this).
 
+## Phase 8 — MVVM-C architecture refactor
+
+Re-architected the flat presentational app into **MVVM-C** (Model · View ·
+ViewModel · Coordinator) on user request. UI output is byte-identical to Phase 7
+(verified by screenshot) — this is a structural change only.
+
+**T22. Service layer.** `ProductRepository` protocol + `SampleDataRepository`.
+- ViewModels depend on the protocol, never on `SampleData` directly. `SampleData`
+  stays the single source of truth (red-line #7), now reachable only through the
+  repository — a clean DI seam for a future network/DB source.
+
+**T23. ViewModels (one per screen).** `@MainActor ObservableObject`, `@Published`
+state, repository-injected: `HomeViewModel` (owns carousel index + `advanceBanner()`),
+`CatalogViewModel`, `FavoritesViewModel`, `CartViewModel` (`isEmpty` flag),
+`ProfileViewModel`.
+
+**T24. Coordinators.** `AppCoordinator` = composition root (builds the repository,
+all 5 VMs, 5 `TabCoordinator`s, holds `selectedTab`). `TabCoordinator` owns a
+per-tab `NavigationPath` + `show(_ product:)`. `AppRoute` enum maps routes →
+destinations; `CoordinatedStack<Root>` wraps each tab's root in a
+`NavigationStack(path:)` and registers `navigationDestination(for: AppRoute.self)`.
+
+**T25. Views consume VMs + forward intent.** Screens take `@ObservedObject` VMs and
+an `onSelectProduct` closure; tapping any `ProductCard` calls
+`coordinator.show(product)`. Root screens hide their nav bar (headers self-manage
+the top area); the pushed detail screen shows the bar + back button.
+
+**T26. ProductDetailScreen (new).** Pushed destination for `AppRoute.productDetail`
+— reuses `ProductImage`/`PriceBlock`/`RatingRow`/`CTAButton` so the coordinator has
+a real navigation target. No reference screenshot exists for it (outside the 5
+mocked surfaces).
+
+> Red-lines #1–#8 all still hold. New layers (`Coordinators/`, `ViewModels/`,
+> `Services/`) require `xcodegen generate` before building.
+
 ## Requirements → tasks → validation traceability
 
 | Req | Task(s)      | Validated by |
